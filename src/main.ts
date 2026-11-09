@@ -1,3 +1,4 @@
+
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -9,10 +10,13 @@ async function bootstrap() {
     instrument: ObserveInstrument,
   });
 
-  // Cho phép React frontend gọi API
-  app.enableCors();
+  // CORS: cho phép Frontend gọi Backend
+  app.enableCors({
+    origin: process.env.FRONTEND_URL || true,
+    credentials: true,
+  });
 
-  // Validate dữ liệu gửi lên API
+  // Validate dữ liệu
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -20,10 +24,7 @@ async function bootstrap() {
     }),
   );
 
-  // =========================
-  // SWAGGER
-  // =========================
-
+  // Swagger
   const config = new DocumentBuilder()
     .setTitle('WATER MANAGER API')
     .setDescription(
@@ -37,14 +38,15 @@ async function bootstrap() {
 
   SwaggerModule.setup('api', app, document);
 
-  // =========================
+  // Render tự cấp PORT
+  const port = process.env.PORT || 3000;
 
-  await app.listen(3000);
+  await app.listen(port, '0.0.0.0');
 
   console.log('========================================');
   console.log('WATER MANAGER API');
-  console.log('API: http://localhost:3000');
-  console.log('Swagger: http://localhost:3000/api');
+  console.log(`Port: ${port}`);
+  console.log(`Swagger: http://localhost:${port}/api`);
   console.log('========================================');
 }
 
